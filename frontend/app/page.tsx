@@ -55,11 +55,9 @@ export default function Home() {
         .build();
 
       const simulated = await server.simulateTransaction(tx);
-      console.log('Group count simulation:', simulated);
       
       if (StellarSDK.rpc.Api.isSimulationSuccess(simulated)) {
         const count = scValToNative(simulated.result!.retval);
-        console.log('Group count:', count);
         
         // Load each group
         const groupsData: (Group & { id: number })[] = [];
@@ -77,11 +75,9 @@ export default function Home() {
             .build();
 
           const groupSim = await server.simulateTransaction(groupTx);
-          console.log(`Group ID ${i} simulation:`, groupSim);
           
           if (StellarSDK.rpc.Api.isSimulationSuccess(groupSim)) {
             const groupData = scValToNative(groupSim.result!.retval);
-            console.log(`Group ID ${i} data:`, groupData);
             groupsData.push({ ...groupData, id: i });
           }
         }
@@ -204,20 +200,17 @@ export default function Home() {
       );
 
       const result = await server.sendTransaction(signedTx as StellarSDK.Transaction);
-      console.log('Transaction result:', result);
       
       if (result.status === 'ERROR') {
         if (result.errorResult) {
           console.error('Transaction error details:', result.errorResult);
         }
-        console.error('Failed transaction XDR:', signedTx.toXDR());
-        throw new Error(`Transaction failed on-chain (Hash: ${result.hash})`);
+        throw new Error(`Transaction failed on-chain`);
       }
 
       // Wait for confirmation
-      console.log('Waiting for confirmation...');
       await server.pollTransaction(result.hash);
-      console.log('Group created successfully:', result.hash);
+      setShowCreateModal(false);
       await loadGroups();
     } catch (error: any) {
       console.error('Error creating group:', error);
@@ -269,7 +262,6 @@ export default function Home() {
       }
 
       // Wait for confirmation
-      console.log('Waiting for confirmation...');
       await server.pollTransaction(result.hash);
       
       await loadGroups();
@@ -324,7 +316,6 @@ export default function Home() {
       }
 
       // Wait for confirmation
-      console.log('Waiting for confirmation...');
       await server.pollTransaction(result.hash);
       
       await loadGroups();
